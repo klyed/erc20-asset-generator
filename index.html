@@ -26,8 +26,9 @@
   <nav class="header-nav">
     <span class="headylogo"><img class="spinlogo" src="/assets/images/coinspin.gif"/>Create-a-Coin.com</span>
     <span class="headyinfos">
-    <p class="content headyaddy" id="current-address"></p>
     <span class="netSpan" style="display:inline-flex;"><p class="content headynetwork" id="current-network"></p><br><span id="chainTop">chain</span></span>
+    <p class="content headyicon" id="squareIcon"></p>
+    <p class="content headyaddy" id="current-address"></p>
     </span>
   </nav>
 <div class="container-first">
@@ -53,13 +54,13 @@
             <br>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">Type</span>
+                <span class="input-group-text" id="basic-addon1">Tier</span>
               </div>
               <select name="coinType form-control" id="coinDropDown">
                   <option value="standard">Standard ERC-20 - An entry level ERC-20 coin standard with a finite total supply</option>
-                  <option value="upgraded">Upgraded ERC-20 - The Upgraded ERC-20 coin features options like infinite total supply</option>
-                  <option value="enhanced">Enhanced ERC-20 - These ERC-20 coins feature functions like mint, burn, and other things</option>
-                  <option value="elite">Elite ERC-20 - A Potentially Over Powered ERC-20 coin template, extremely customizable options</option>
+                  <option value="upgraded" disabled title="This ERC-20 Option Coming Soon!" style="color:#222222;">Upgraded ERC-20 - The Upgraded ERC-20 coin features options like infinite total supply</option>
+                  <option value="enhanced" disabled title="This ERC-20 Option Coming Soon!" style="color:#222222;">Enhanced ERC-20 - These ERC-20 coins feature functions like mint, burn, and other things</option>
+                  <option value="elite" disabled title="This ERC-20 Option Coming Soon!" style="color:#222222;">Elite ERC-20 - A Potentially Over Powered ERC-20 coin template, extremely customizable options</option>
               </select>              <div class="input-group-append">
                 <i id="info-name" class="material-icons info" title="The Type of Coin Template you Choose will Determine the Options Available">info</i>
               </div>
@@ -125,6 +126,10 @@
                     <span class="error-msg" id="total-supply-error-msg"></span>
                   </div>
                 </div>
+                <div>
+                  <input type="checkbox" id="verify" name="scales" checked>
+                  <label for="scales">Verify Coin on <span id="verifySite"></span></label>
+                </div>
                 <div class="form-group">
                 <button align="center" class="submit-button btn btn-primary" id="submit-btn" type="submit">Mint <span class="newCoinTicker"></span></button>
                 </div>
@@ -172,5 +177,6 @@
 <script async src="/assets/js/popper.min.js"></script>
 <script async src="/assets/js/web3.min.js"></script>
 <!--Core-->
+<script type="module" src="/scripts/blockies.js"></script>
 <script type="module" src="/scripts/app.js"></script>
 </html>

@@ -658,43 +658,50 @@ function handleChainChanged(_chainId) {
         isMainNetwork = true;
         currentNetwork.text('ETH').show();
         $('#current-network').val('ETH');
+        $('#verifySite').html('EtherScan.io');
         payType = "ETH";
     } else if (actualID == "0x3") {
         isRopsten = true;
         currentNetwork.text('ROPSTEN').show();
         $('#current-network').val('ROPSTEN');
+        $('#verifySite').html('EtherScan.io');
         payType = "ETH";
     } else if (actualID == "0x4") {
         isRinkeby = true;
         currentNetwork.text('RINKEBY').show();
         $('#current-network').val('RINKEBY');
+        $('#verifySite').html('EtherScan.io');
         payType = "ETH";
     } else if (actualID == "0x5") {
         isGoerli = true;
         currentNetwork.text('GOERLI').show();
         $('#current-network').val('GOERLI');
+        $('#verifySite').html('EtherScan.io');
         payType = "ETH";
     } else if (actualID == "0xa86a") {
           isAvax = true;
           currentNetwork.text('AVAX').show();
           $('#current-network').val('AVAX');
+          $('#verifySite').html('SnowTrace.io');
         payType = "AVAX";
     } else if (actualID == "0xa869") {
         isFuji = true;
         currentNetwork.text('FUJI').show();
         $('#current-network').val('FUJI');
+        $('#verifySite').html('SnowTrace.io');
         payType = "AVAX";
       } else if (actualID == "0x38") {
           isBinance= true;
           currentNetwork.text('BNB').show();
           $('#current-network').val('BNB');
+          $('#verifySite').html('BSCscan.com');
           payType = "BNB";
       } else {
         currentNetwork.text(`ID: ${actualID}`).show();
       }
       //$('#current-address').value('');
       $('#current-network').val(`${payType}`);
-      $('#payTypeCoin').value(`${payType}`);
+      $('#payTypeCoin').val(`${payType}`);
     }
 
 
@@ -726,36 +733,43 @@ function start() {
               isMainNetwork = true;
               currentNetwork.text('ETH').show();
               $('#current-network').val('ETH');
+              $('#verifySite').html('EtherScan.io');
               payType = "ETH";
           } else if (actualID == "0x3") {
               isRopsten = true;
               currentNetwork.text('ROPSTEN').show();
               $('#current-network').val('ROPSTEN');
+              $('#verifySite').html('EtherScan.io');
               payType = "ETH";
           } else if (actualID == "0x4") {
               isRinkeby = true;
               currentNetwork.text('RINKEBY').show();
               $('#current-network').val('RINKEBY');
+              $('#verifySite').html('EtherScan.io');
               payType = "ETH";
           } else if (actualID == "0x5") {
               isGoerli = true;
               currentNetwork.text('GOERLI').show();
               $('#current-network').val('GOERLI');
+              $('#verifySite').html('EtherScan.io');
               payType = "ETH";
           } else if (actualID == "0xa86a") {
                 isAvax = true;
                 currentNetwork.text('AVAX').show();
                 $('#current-network').val('AVAX');
-              payType = "AVAX";
+                $('#verifySite').html('SnowTrace.io');
+                payType = "AVAX";
           } else if (actualID == "0xa869") {
               isFuji = true;
               currentNetwork.text('FUJI').show();
               $('#current-network').val('FUJI');
+              $('#verifySite').html('SnowTrace.io');
               payType = "AVAX";
             } else if (actualID == "0x38") {
                 isBinance= true;
                 currentNetwork.text('BNB').show();
                 $('#current-network').val('BNB');
+                $('#verifySite').html('BSCscan.com');
                 payType = "BNB";
             } else
               currentNetwork.text(`ID: ${actualID}`).show();
@@ -790,7 +804,9 @@ function start() {
                 }
             })
             .then(function (balance) {
-                accountAddress.html(`<strong>${(String(address).slice(0,5)).toUpperCase()}..${(String(address).slice(String(address).length - 5, String(address).length)).toUpperCase()} - ${balance} <b id="payTypeCoin">${payType}</b></strong>`).show();
+              if(balance == 0 || !balance) balance = 0;
+                accountAddress.html(`<strong>${(String(address).slice(0,5)).toUpperCase()} ${parseFloat(balance).toFixed(6)} <b id="payTypeCoin">${payType}</b></strong>`).show();
+                getIdenticonSquare(address);
             })
             .fail(function (err) {
                 if (err.message !== "Metamask Locked")
@@ -977,6 +993,14 @@ assetForm.submit(function (e) {
         })
     }
 });
+
+function getIdenticonSquare(address){
+  if(!address) return;
+  var squareIcon = document.getElementById('squareIcon');
+  squareIcon.style.backgroundImage = 'url(' + blockies.create({ seed:address ,size: 8,scale: 4}).toDataURL()+')';
+  return;
+};
+
 
 function nthRoot(x, n) {
     if (x < 0 && n % 2 != 1) return NaN; // Not well defined
