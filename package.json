@@ -26,5 +26,9 @@
     "token",
     "asset",
     "web3js"
-  ]
+  ],
+  "dependencies": {
+    "canvas": "^2.8.0",
+    "express": "^4.17.1"
+  }
 }

@@ -4,8 +4,171 @@ var web3,
     isRopsten,
     isRinkeby,
     isGoerli,
+    isFuji,
+    isAvax,
+    isBinance,
     isMetaMaskLocked,
     address;
+/*
+    const router = express.Router()
+import { identiconCanvas } from './identicons.js';
+
+    function getIdenticon(){
+      router.get('/:address', function (req, res) {
+        const address = req.params.address;
+        const identiconPngBuffer = identiconCanvas(address).toBuffer('image/png')
+
+        res.setHeader('Content-Type', 'image/png')
+        res.send(identiconPngBuffer)
+      });
+    };
+    */
+
+
+    /*
+
+    ThreeJs custom waves
+    Original script by ThreeJS : https://threejs.org/examples/canvas_particles_waves.html
+    Modified version for Cloudoru by Kevin Rajaram : http://kevinrajaram.com
+    Date: 08/14/2014
+
+
+    */
+
+    var SEPARATION = 40, AMOUNTX = 130, AMOUNTY = 35;
+
+    var container;
+    var camera, scene, renderer;
+    /*
+
+    if (window.WebGLRenderingContext){
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      }
+    else {
+      renderer = new THREE.CanvasRenderer();
+      }
+    */
+
+    var particles, particle, count = 0;
+
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    init();
+    animate();
+
+    function init() {
+
+      container = document.createElement( 'div' );
+      document.body.appendChild( container );
+      if(container) {
+          container.className += container.className ? ' waves' : 'waves';
+      }
+
+      camera = new THREE.PerspectiveCamera( 120, window.innerWidth / window.innerHeight, 1, 10000 );
+      camera.position.y = 150; //changes how far back you can see i.e the particles towards horizon
+      camera.position.z = 300; //This is how close or far the particles are seen
+
+      camera.rotation.x = 0.35;
+
+      scene = new THREE.Scene();
+
+      particles = new Array();
+
+      var PI2 = Math.PI * 2;
+      var material = new THREE.SpriteCanvasMaterial( {
+
+        color: 0xFFD700, //changes color of particles
+        program: function ( context ) {
+
+          context.beginPath();
+          context.arc( 0, 0, 0.1, 0, PI2, true );
+          context.fill();
+
+        }
+
+      } );
+
+      var i = 0;
+
+      for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+        for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+          particle = particles[ i ++ ] = new THREE.Sprite( material );
+          particle.position.x = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
+          particle.position.z = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) - 10 );
+          scene.add( particle );
+
+        }
+
+      }
+
+      renderer = new THREE.CanvasRenderer();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      renderer.setClearColor( 0x111111, 1);
+      container.appendChild( renderer.domElement );
+
+      window.addEventListener( 'resize', onWindowResize, false );
+
+    }
+
+    function onWindowResize() {
+
+      windowHalfX = window.innerWidth / 2;
+      windowHalfY = window.innerHeight / 2;
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize( window.innerWidth, window.innerHeight );
+
+    }
+
+    function animate() {
+
+      requestAnimationFrame( animate );
+
+      render();
+
+    }
+
+    function render() {
+
+      var i = 0;
+
+      for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+        for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+          particle = particles[ i++ ];
+          particle.position.y = ( Math.sin( ( ix + count ) * 0.5 ) * 20 ) + ( Math.sin( ( iy + count ) * 0.5 ) * 20 );
+          particle.scale.x = particle.scale.y = ( Math.sin( ( ix + count ) * 0.3 ) + 2 ) * 4 + ( Math.sin( ( iy + count ) * 0.5 ) + 1 ) * 4;
+
+        }
+
+      }
+
+      renderer.render( scene, camera );
+
+      // This increases or decreases speed
+      count += 0.055;
+
+    }
+
+    var BIGLET = "ERC";
+setInterval(function(){
+  if(BIGLET == "ERC") {
+    BIGLET = "ARC";
+  } else if(BIGLET == "ARC") {
+    BIGLET = "BEP";
+  } else if(BIGLET == "BEP") BIGLET = "ERC";
+
+  $('#EAB').html(`${BIGLET}`);
+}, 5000);
+
+
+var payType = "";
 
 // abi of StandardToken.sol
 var abi = [
@@ -436,12 +599,12 @@ assetFormInput.prop("disabled", true);
 window.addEventListener('load', async () => {
     // New ethereum provider
     if (window.ethereum) {
-        console.log("New ethereum provider detected");
+        console.log("New Web3 Provider Detected");
         // Instance web3 with the provided information
         web3 = new Web3(window.ethereum);
         // ask user for permission
         metamaskStatus
-            .html('Please allow MetaMask to view your addresses')
+            .html('Please Login to MetaMask Wallet to View Your Addresses')
             .css({
                 "text-align": "center",
                 "color": "#0000ff"
@@ -449,7 +612,7 @@ window.addEventListener('load', async () => {
             .show();
         window.ethereum.enable().then(function (abc) {
             // user approved permission
-            console.log("abc ===>", abc)
+            console.log("Connected Address:", abc)
             start()
         }).catch(function (error) {
             metamaskStatus.css({ "color": "#ff0000" })
@@ -458,7 +621,7 @@ window.addEventListener('load', async () => {
                 metamaskStatus.html('You reject the permission request, Please refresh to try again');
                 console.log("User rejected the permission request.");
             } else if (error.code == -32002) {
-                metamaskStatus.html("Metamask permission request is already pending</br>Open Metamask to allow")
+                metamaskStatus.html("Metamask is requesting permission...</br>Confirm in Metamask to Continue")
                     .css({ "color": "#ffa500" });
             } else {
                 metamaskStatus.html(error.message);
@@ -475,7 +638,7 @@ window.addEventListener('load', async () => {
     // No web3 provider
     else {
         console.log('No web3 provider detected || web3 not exits');
-        metamaskStatus.html('You do not appear to be connected to any Ethereum network. To use this service and deploy your contract, we recommend using the <a href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en">MetaMask</a> plugin for Google Chrome, which allows your web browser to connect to an Ethereum network.').show();
+        metamaskStatus.html('You do not appear to be connected to any network. To use this service and deploy your contract, we recommend using the <a href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en">MetaMask</a> plugin for Google Chrome, which allows your web browser to connect to an Ethereum network.').show();
     }
 });
 
@@ -485,11 +648,47 @@ function handleAccountsChanged(accounts) {
 }
 
 function handleChainChanged(_chainId) {
+  console.log(_chainId);
     // Handle the new chain.
     // Correctly handling chain changes can be complicated.
     // We recommend reloading the page unless you have good reason not to.
-    window.location.reload();
-}
+    //window.location.reload();
+    var actualID = provider.chainId;
+    if (actualID == "0x1") {
+        isMainNetwork = true;
+        currentNetwork.text('ETHEREUM').show();
+        payType = "ETH";
+    } else if (actualID == "0x3") {
+        isRopsten = true;
+        currentNetwork.text('ROPSTEN').show();
+        payType = "ETH";
+    } else if (actualID == "0x4") {
+        isRinkeby = true;
+        currentNetwork.text('RINKEBY').show();
+        payType = "ETH";
+    } else if (actualID == "0x5") {
+        isGoerli = true;
+        currentNetwork.text('GOERLI').show();
+        payType = "ETH";
+    } else if (actualID == "0xa86a") {
+          isAvax = true;
+          currentNetwork.text('AVALANCHE').show();
+        payType = "AVAX";
+    } else if (actualID == "0xa869") {
+        isFuji = true;
+        currentNetwork.text('FUJI').show();
+        payType = "AVAX";
+      } else if (actualID == "0x38") {
+          isBinance= true;
+          currentNetwork.text('BNB').show();
+          payType = "BNB";
+      } else {
+        currentNetwork.text(`ID: ${actualID}`).show();
+      }
+      //$('#current-address').value('');
+      $('#payTypeCoin').value(payType);
+    }
+
 
 function metamaskEvents() {
     ethereum.on('accountsChanged', handleAccountsChanged)
@@ -508,26 +707,44 @@ function metamaskEvents() {
 function start() {
     provider = web3.currentProvider;
     assetFormInput.prop("disabled", false);
-    metamaskStatus.hide()
+    //metamaskStatus.hide()
     // metamaskEvents()
-    getEthNetworkId()
-        .then(function (networkId) {
-            if (networkId === '1') {
-                isMainNetwork = true;
-                currentNetwork.text('You are currently at Mainnet').show();
-            } else if (networkId === '3') {
-                isRopsten = true;
-                currentNetwork.text('Your are currently at Ropsten testnet.').show();
-            } else if (networkId === '4') {
-                isRinkeby = true;
-                currentNetwork.text('Your are currently at Rinkeby testnet.').show();
-            } else if (networkId === '5') {
-                isGoerli = true;
-                currentNetwork.text('Your are currently at Goerli testnet.').show();
+    var netType = web3.eth.net.getNetworkType().then((r) => {console.log(r); return r;});
+    var actualID = provider.chainId;
+    getEthNetworkId().then(function (networkId) {
+          console.log(`Network ID: ${networkId}`);
+          console.log(`Actual ID: ${actualID}`);
+          if (actualID == "0x1") {
+              isMainNetwork = true;
+              currentNetwork.text('ETHEREUM').show();
+              payType = "ETH";
+          } else if (actualID == "0x3") {
+              isRopsten = true;
+              currentNetwork.text('ROPSTEN').show();
+              payType = "ETH";
+          } else if (actualID == "0x4") {
+              isRinkeby = true;
+              currentNetwork.text('RINKEBY').show();
+              payType = "ETH";
+          } else if (actualID == "0x5") {
+              isGoerli = true;
+              currentNetwork.text('GOERLI').show();
+              payType = "ETH";
+          } else if (actualID == "0xa86a") {
+                isAvax = true;
+                currentNetwork.text('AVALANCHE').show();
+              payType = "AVAX";
+          } else if (actualID == "0xa869") {
+              isFuji = true;
+              currentNetwork.text('FUJI').show();
+              payType = "AVAX";
+            } else if (actualID == "0x38") {
+                isBinance= true;
+                currentNetwork.text('BNB').show();
+                payType = "BNB";
             } else
-                currentNetwork.text('Your current network id is ' + networkId).show();
-        })
-        .fail(function (err) {
+              currentNetwork.text(`ID: ${actualID}`).show();
+        }).fail(function (err) {
             console.log(err)
         });
 
@@ -558,7 +775,7 @@ function start() {
                 }
             })
             .then(function (balance) {
-                accountAddress.html('<strong>Selected Account: ' + address + ' (' + balance + ' eth)</strong>').show();
+                accountAddress.html(`<strong>${(String(address).slice(0,5)).toUpperCase()}..${(String(address).slice(String(address).length - 5, String(address).length)).toUpperCase()} - ${balance} <b id="payTypeCoin">${payType}</b></strong>`).show();
             })
             .fail(function (err) {
                 if (err.message !== "Metamask Locked")
@@ -630,16 +847,48 @@ function isLocked() {
         });
 }
 
+async function addToken(a, s, d, i) {
+  const tokenAddress = '0xc00971105e61274c8a5cd5a88fe7e037d935b513';
+  var tokenAddSymbol = tokenSymbol;
+  var tokenAddDecimals = decimalUnits;
+  var tokenImage = 'https://assets.codepen.io/4625073/1.jpeg';
+  try {
+    const wasAdded = await ethereum.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: a,
+          symbol: s,
+          decimals: d,
+          image: i,
+        },
+      },
+    });
+    if (wasAdded) {
+      console.log('Thanks for your interest!');
+    } else {
+      console.log('HelloWorld Coin has not been added');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+  var tokenSymbol;
+  var decimalUnits;
+  var tokenName;
+  var initialSupply;
 //call function on form submit
 assetForm.submit(function (e) {
 
     //prevent the form from actually submitting.
     e.preventDefault();
 
-    var initialSupply = $('#total-supply').val();
-    var tokenName = $('#name').val();
-    var decimalUnits = $('#decimals').val();
-    var tokenSymbol = $('#symbol').val();
+    initialSupply = parseFloat($('#total-supply').val());
+    tokenName = String($('#name').val());
+    decimalUnits = parseInt($('#decimals').val());
+    tokenSymbol = String($('#symbol').val());
 
 
     if (tokenName === '') {
@@ -655,6 +904,8 @@ assetForm.submit(function (e) {
         assetFormInput.prop("disabled", true);
         statusText.innerHTML = 'Waiting for contract to be deployed...';
         var standardtokenContract = new web3.eth.Contract(abi);
+        console.log(`standardtokenContract:`);
+        console.log(standardtokenContract);
         standardtokenContract.deploy({
             data: '0x' + bytecode,
             arguments: [initialSupply, tokenName, decimalUnits, tokenSymbol]
@@ -666,7 +917,7 @@ assetForm.submit(function (e) {
                 assetFormInput.prop("disabled", false);
                 return;
             }
-            console.log('Transaction Hash :', transactionHash);
+            console.log(`Transaction Hash: ${transactionHash}`);
             if (isMainNetwork) {
                 statusText.innerHTML = '<p align="center">Contract deployment is in progress - please be patient. If nothing happens for a while check if there\'s any errors in the console (hit F12).<br> <strong>Transaction hash: </strong><br> <a href="https://etherscan.io/tx/' + transactionHash + '" target="_blank">' + transactionHash + '</a></p>'
             } else if (isRopsten) {
@@ -675,8 +926,12 @@ assetForm.submit(function (e) {
                 statusText.innerHTML = '<p align="center">Contract deployment is in progress - please be patient. If nothing happens for a while check if there\'s any errors in the console (hit F12). <br> <strong> Transaction hash: </strong><br> <a href="https://rinkeby.etherscan.io/tx/' + transactionHash + '" target="_blank">' + transactionHash + '</a></p>'
             } else if (isGoerli) {
                 statusText.innerHTML = '<p align="center">Contract deployment is in progress - please be patient. If nothing happens for a while check if there\'s any errors in the console (hit F12). <br> <strong> Transaction hash: </strong><br> <a href="https://goerli.etherscan.io/tx/' + transactionHash + '" target="_blank">' + transactionHash + '</a></p>'
+            } else if (isFuji) {
+                statusText.innerHTML = `<p align="center">Contract deployment is in progress - please be patient. If nothing happens for a while check if there\'s any errors in the console (hit F12). <br> <strong> Transaction hash: </strong><br> <a href="https://testnet.snowtrace.io/tx/' + transactionHash + '" target="_blank">' + transactionHash + '</a></p>`;
+            } else if (isAvax) {
+                statusText.innerHTML = `<p align="center">Contract deployment is in progress - please be patient. If nothing happens for a while check if there is any errors in the console (hit F12). <br> <strong> Transaction hash: </strong><br> <a href="https://snowtrace.io/tx/${transactionHash}" target="_blank">${transactionHash}</a></p>`;
             } else
-                statusText.innerHTML = 'Contract deployment is in progress - please be patient. If nothing happens for a while check if there\'s any errors in the console (hit F12). Transaction hash: ' + transactionHash
+                statusText.innerHTML = `Contract deployment is in progress - please be patient. If nothing happens for a while check if there is any errors in the console (hit F12). Transaction hash: ${transactionHash}</a></p>`;
         }).on('confirmation', function () {
             return;
         }).then(function (newContractInstance) {
@@ -684,18 +939,23 @@ assetForm.submit(function (e) {
                 console.log(newContractInstance);
                 return;
             }
-            console.log('Deployed Contract Address : ', newContractInstance.options.address);
+            console.log('Deployed Contract Address : ', newContractInstance.options);
             var newContractAddress = newContractInstance.options.address;
+            var ATB = `<button class="addCoin" onclick="addToken(\'${newContractAddress}\', \'${tokenSymbol}\', \'${decimalUnits}\', \'\')">Add ${String(tokenSymbol).toUpperCase()} to MetaMask</button>`;
             if (isMainNetwork) {
-                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>'
+                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>';
             } else if (isRopsten) {
-                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://ropsten.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>'
+                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://ropsten.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>';
             } else if (isRinkeby) {
-                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://rinkeby.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>'
+                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://rinkeby.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>';
             } else if (isGoerli) {
-                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://goerli.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>'
+                statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://goerli.etherscan.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>';
+            } else if (isFuji) {
+                  statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://testnet.snowtrace.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a><br>' + ATB;
+            } else if (isAvax) {
+                  statusText.innerHTML = 'Transaction  mined! Contract address: <a href="https://snowtrace.io/token/' + newContractAddress + '" target="_blank">' + newContractAddress + '</a>';
             } else
-                statusText.innerHTML = 'Contract deployed at address <b>' + newContractAddress + '</b> - keep a record of this.'
+                  statusText.innerHTML = 'Contract deployed at address <b>' + newContractAddress + '</b> - keep a record of this.';
         }).catch(function (error) {
             console.error(error);
             assetFormInput.prop("disabled", false);
@@ -714,6 +974,14 @@ $("#decimals").keypress(function (e) {
         //display error message
         $("#decimals-error-msg").html("Digits Only").show().fadeOut("slow");
         return false;
+    } else if(parseInt($("#decimals").val()) > 18 ){
+      $("#decimals").val(18)
+    } else if(parseInt($("#decimals").val()) < 0){
+      $("#decimals").val(0)
+    } else {
+      var fixNum = parseInt($("#decimals").val());
+      if(fixNum == null || fixNum == NaN) fixNum = 0;
+      $("#decimals").val(fixNum);
     }
 });
 
@@ -732,3 +1000,5 @@ $("#total-supply").keypress(function (e) {
         // })
     }
 });
+
+//module.export;
