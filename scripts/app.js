@@ -656,37 +656,45 @@ function handleChainChanged(_chainId) {
     var actualID = provider.chainId;
     if (actualID == "0x1") {
         isMainNetwork = true;
-        currentNetwork.text('ETHEREUM').show();
+        currentNetwork.text('ETH').show();
+        $('#current-network').val('ETH');
         payType = "ETH";
     } else if (actualID == "0x3") {
         isRopsten = true;
         currentNetwork.text('ROPSTEN').show();
+        $('#current-network').val('ROPSTEN');
         payType = "ETH";
     } else if (actualID == "0x4") {
         isRinkeby = true;
         currentNetwork.text('RINKEBY').show();
+        $('#current-network').val('RINKEBY');
         payType = "ETH";
     } else if (actualID == "0x5") {
         isGoerli = true;
         currentNetwork.text('GOERLI').show();
+        $('#current-network').val('GOERLI');
         payType = "ETH";
     } else if (actualID == "0xa86a") {
           isAvax = true;
-          currentNetwork.text('AVALANCHE').show();
+          currentNetwork.text('AVAX').show();
+          $('#current-network').val('AVAX');
         payType = "AVAX";
     } else if (actualID == "0xa869") {
         isFuji = true;
         currentNetwork.text('FUJI').show();
+        $('#current-network').val('FUJI');
         payType = "AVAX";
       } else if (actualID == "0x38") {
           isBinance= true;
           currentNetwork.text('BNB').show();
+          $('#current-network').val('BNB');
           payType = "BNB";
       } else {
         currentNetwork.text(`ID: ${actualID}`).show();
       }
       //$('#current-address').value('');
-      $('#payTypeCoin').value(payType);
+      $('#current-network').val(`${payType}`);
+      $('#payTypeCoin').value(`${payType}`);
     }
 
 
@@ -707,8 +715,8 @@ function metamaskEvents() {
 function start() {
     provider = web3.currentProvider;
     assetFormInput.prop("disabled", false);
-    //metamaskStatus.hide()
-    // metamaskEvents()
+    metamaskStatus.hide()
+     metamaskEvents()
     var netType = web3.eth.net.getNetworkType().then((r) => {console.log(r); return r;});
     var actualID = provider.chainId;
     getEthNetworkId().then(function (networkId) {
@@ -716,31 +724,38 @@ function start() {
           console.log(`Actual ID: ${actualID}`);
           if (actualID == "0x1") {
               isMainNetwork = true;
-              currentNetwork.text('ETHEREUM').show();
+              currentNetwork.text('ETH').show();
+              $('#current-network').val('ETH');
               payType = "ETH";
           } else if (actualID == "0x3") {
               isRopsten = true;
               currentNetwork.text('ROPSTEN').show();
+              $('#current-network').val('ROPSTEN');
               payType = "ETH";
           } else if (actualID == "0x4") {
               isRinkeby = true;
               currentNetwork.text('RINKEBY').show();
+              $('#current-network').val('RINKEBY');
               payType = "ETH";
           } else if (actualID == "0x5") {
               isGoerli = true;
               currentNetwork.text('GOERLI').show();
+              $('#current-network').val('GOERLI');
               payType = "ETH";
           } else if (actualID == "0xa86a") {
                 isAvax = true;
-                currentNetwork.text('AVALANCHE').show();
+                currentNetwork.text('AVAX').show();
+                $('#current-network').val('AVAX');
               payType = "AVAX";
           } else if (actualID == "0xa869") {
               isFuji = true;
               currentNetwork.text('FUJI').show();
+              $('#current-network').val('FUJI');
               payType = "AVAX";
             } else if (actualID == "0x38") {
                 isBinance= true;
                 currentNetwork.text('BNB').show();
+                $('#current-network').val('BNB');
                 payType = "BNB";
             } else
               currentNetwork.text(`ID: ${actualID}`).show();
